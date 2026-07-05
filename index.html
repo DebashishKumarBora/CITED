@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cited, do you show up when the world asks AI?</title>
+<meta name="description" content="Cited measures your brand's visibility inside AI answers. It asks real AI models the buyer questions your customers ask, then shows where you land, who gets recommended instead, and exactly how to get cited. Runs in your browser, bring your own free key." />
+<meta property="og:title" content="Cited, AI answer-engine visibility" />
+<meta property="og:description" content="See where you show up when people ask ChatGPT, Gemini and Perplexity for recommendations, and how to get cited." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%230E1220'/%3E%3Cpath d='M28 30h44M28 50h30M28 70h20' stroke='%235B5BF5' stroke-width='9' stroke-linecap='round'/%3E%3Ccircle cx='74' cy='66' r='11' fill='none' stroke='%23EC4899' stroke-width='7'/%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F3F8; --panel:#FFFFFF; --panel2:#F8F9FC; --raise:#F1F2F8;
+  --ink:#0E1220; --muted:#5B6478; --faint:#9AA2B4;
+  --line:#E7E9F1; --line2:#D6DAE6;
+  --indigo:#5B5BF5; --violet:#8B5CF6; --pink:#EC4899;
+  --green:#12B886; --greend:#0CA678; --red:#F03E5E; --amber:#F59E0B; --blue:#3B82F6;
+  --prism:linear-gradient(100deg,#5B5BF5,#8B5CF6,#EC4899);
+  --display:'Sora','Segoe UI',system-ui,sans-serif; --ui:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+  --r:16px; --r-sm:11px; --maxw:1200px; --ease:cubic-bezier(.22,1,.36,1);
+  --shadow:0 1px 2px rgba(16,18,32,.04),0 10px 30px rgba(16,18,32,.06);
+  --shadow-sm:0 1px 2px rgba(16,18,32,.05),0 4px 12px rgba(16,18,32,.05);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--ui);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-size:15px;letter-spacing:-.006em}
+a{color:inherit;text-decoration:none}
+svg{display:block}
+button{font-family:inherit;cursor:pointer;color:inherit}
+input,select,textarea{font-family:inherit;color:var(--ink)}
+::selection{background:var(--indigo);color:#fff}
+:focus-visible{outline:2px solid var(--indigo);outline-offset:2px;border-radius:6px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{width:100%;max-width:var(--maxw);margin:0 auto;padding:0 18px}
+.hidden{display:none!important}
+.grad{background:var(--prism);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pos{color:var(--green)} .neg{color:var(--red)}
+
+/* header */
+header{position:sticky;top:0;z-index:60;background:rgba(241,243,248,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+nav{display:flex;align-items:center;gap:10px;height:60px}
+.logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:800;font-size:1.24rem;letter-spacing:-.03em}
+.logo .lm{width:29px;height:29px;flex:0 0 auto;border-radius:8px}
+.hgroup{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pill{display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px;box-shadow:var(--shadow-sm)}
+.pill button{border:0;background:none;color:var(--muted);font-weight:600;font-size:.76rem;padding:6px 11px;border-radius:999px;transition:.18s;white-space:nowrap}
+.pill.detail button.on{background:var(--ink);color:#fff}
+.aiT{display:flex;align-items:center;gap:7px;font-size:.78rem;font-weight:600;color:var(--muted);cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:5px 11px 5px 9px;background:var(--panel);box-shadow:var(--shadow-sm)}
+.aiT .sw{width:34px;height:20px;border-radius:999px;background:var(--line2);position:relative;transition:.22s;flex:0 0 auto}
+.aiT .sw::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.22s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.aiT.on{color:var(--ink);border-color:transparent;background:var(--prism)}
+.aiT.on .sw{background:rgba(255,255,255,.4)} .aiT.on .sw::after{left:16px}
+.aiT.on span{color:#fff}
+.iconbtn{height:38px;padding:0 13px;border:1px solid var(--line);background:var(--panel);border-radius:10px;display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-weight:600;font-size:.8rem;box-shadow:var(--shadow-sm);transition:.16s}
+.iconbtn:hover{color:var(--ink);border-color:var(--line2)}
+.iconbtn svg{width:16px;height:16px}
+
+/* setup / hero */
+.hero{padding:34px 0 20px;text-align:center}
+.kick{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--indigo);background:rgba(91,91,245,.08);border:1px solid rgba(91,91,245,.16);padding:5px 12px;border-radius:999px;margin-bottom:18px}
+.hero h1{font-family:var(--display);font-size:clamp(2.1rem,7vw,3.4rem);font-weight:800;line-height:1.04;letter-spacing:-.035em}
+.hero p{color:var(--muted);max-width:560px;margin:15px auto 0;font-size:1.04rem}
+.setup{max-width:760px;margin:26px auto 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);min-width:0}
+.setup .ctitle{font-family:var(--display);font-weight:700;font-size:1.02rem;margin-bottom:4px}
+.setup .csub{color:var(--muted);font-size:.86rem;margin-bottom:16px}
+.formgrid{display:grid;grid-template-columns:1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:6px;text-align:left}
+.fg label{font-size:.8rem;font-weight:600;color:var(--muted)}
+.fg .hint{font-weight:400;color:var(--faint)}
+.fin{width:100%;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:11px 13px;font-size:.95rem;outline:none;transition:.16s}
+.fin:focus{border-color:var(--indigo);background:#fff;box-shadow:0 0 0 3px rgba(91,91,245,.1)}
+textarea.fin{resize:vertical;min-height:44px;font-family:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line2);border-radius:999px;padding:5px 8px 5px 11px;font-size:.82rem;font-weight:500}
+.chip button{border:0;background:none;color:var(--faint);display:grid;place-items:center;padding:0}
+.chip button:hover{color:var(--red)}
+.chip.you{background:rgba(91,91,245,.09);border-color:rgba(91,91,245,.25);color:var(--indigo);font-weight:700}
+.promptlist{display:flex;flex-direction:column;gap:8px}
+.prow{display:flex;align-items:center;gap:8px}
+.prow .pi{flex:0 0 auto;width:24px;height:24px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--mono);font-size:.7rem;color:var(--faint)}
+.prow .loc{flex:0 0 auto;font-size:.62rem;font-weight:700;color:var(--pink);background:rgba(236,72,153,.1);border-radius:5px;padding:2px 5px;text-transform:uppercase;letter-spacing:.04em}
+.prow input{flex:1}
+.prow .del{flex:0 0 auto;color:var(--faint);background:none;border:0;display:grid;place-items:center}
+.prow .del:hover{color:var(--red)}
+.checkrow{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--panel2);border:1px solid var(--line);border-radius:11px}
+.checkrow input[type=checkbox]{width:18px;height:18px;accent-color:var(--indigo);cursor:pointer}
+.checkrow label{font-size:.88rem;font-weight:600;cursor:pointer}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:.9rem;border-radius:11px;padding:12px 20px;border:1px solid var(--line2);background:var(--panel);transition:.16s;box-shadow:var(--shadow-sm)}
+.btn:hover{border-color:var(--line2);transform:translateY(-1px)}
+.btn.primary{background:var(--prism);color:#fff;border:0;box-shadow:0 6px 18px rgba(91,91,245,.3)}
+.btn.primary:hover{box-shadow:0 10px 26px rgba(91,91,245,.4)}
+.btn.ghost{background:none;box-shadow:none}
+.btn.block{width:100%}
+.btn svg{width:16px;height:16px}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+.addbtn{display:inline-flex;align-items:center;gap:7px;background:none;border:1px dashed var(--line2);color:var(--muted);border-radius:10px;padding:9px 13px;font-size:.84rem;font-weight:600;transition:.16s}
+.addbtn:hover{border-color:var(--indigo);color:var(--indigo)}
+.addbtn svg{width:14px;height:14px}
+.keyrow{display:none;flex-direction:column;gap:8px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px;margin-top:14px;text-align:left}
+.keyrow.show{display:flex}
+.keyrow input{background:#fff}
+.keyrow .small{font-size:.74rem;color:var(--faint)} .keyrow .small a{color:var(--indigo);font-weight:600}
+
+/* scanning */
+.scanning{text-align:center;padding:50px 0}
+.scanorb{width:74px;height:74px;margin:0 auto 20px;border-radius:50%;background:var(--prism);position:relative;animation:pulse 1.4s var(--ease) infinite}
+.scanorb::after{content:"";position:absolute;inset:8px;border-radius:50%;background:var(--bg)}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.12);opacity:.75}}
+.scanning h3{font-family:var(--display);font-weight:700;font-size:1.1rem}
+.scanning .cur{color:var(--muted);font-size:.9rem;margin-top:6px;min-height:1.2em}
+.progress{max-width:340px;height:7px;background:var(--line);border-radius:999px;margin:18px auto 0;overflow:hidden}
+.progress .fl{height:100%;background:var(--prism);border-radius:999px;transition:width .3s var(--ease)}
+
+/* results */
+.ws{padding:16px 0 90px}
+.resulthead{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.gauge{flex:0 0 auto;position:relative;width:120px;height:120px}
+.gauge .gv{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.gauge .gv .n{font-family:var(--mono);font-weight:800;font-size:1.9rem;line-height:1}
+.gauge .gv .l{font-size:.62rem;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.rhmeta{flex:1;min-width:200px}
+.rhmeta h2{font-family:var(--display);font-weight:800;font-size:1.3rem;letter-spacing:-.02em;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rhmeta .verdict{font-size:.92rem;color:var(--muted);margin-top:4px}
+.statusbadge{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:4px 9px;border-radius:999px}
+.statusbadge .d{width:6px;height:6px;border-radius:50%}
+.statusbadge.live{background:rgba(18,184,134,.12);color:var(--greend)} .statusbadge.live .d{background:var(--green)}
+.statusbadge.sample{background:rgba(245,158,11,.13);color:#B4770B} .statusbadge.sample .d{background:var(--amber)}
+.rhstats{display:flex;gap:22px;flex-wrap:wrap}
+.rhstat .v{font-family:var(--mono);font-weight:800;font-size:1.3rem}
+.rhstat .l{font-size:.72rem;color:var(--faint);font-weight:600}
+
+.subnav{display:flex;gap:4px;overflow-x:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:16px;box-shadow:var(--shadow-sm);-webkit-overflow-scrolling:touch}
+.subnav button{border:0;background:none;color:var(--muted);font-weight:600;font-size:.83rem;padding:9px 14px;border-radius:8px;white-space:nowrap;transition:.18s}
+.subnav button.on{background:var(--ink);color:#fff}
+.tab{display:none} .tab.on{display:block;animation:fade .35s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.grid{display:grid;grid-template-columns:1fr;gap:14px}
+.ctitle{font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.ctitle .help{margin-left:auto;font-weight:500;text-transform:none;letter-spacing:0}
+
+/* donut / bars */
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:.78rem;color:var(--muted)}
+.legend .lg{display:flex;align-items:center;gap:6px}
+.legend .sw{width:11px;height:11px;border-radius:3px}
+.sov{display:flex;flex-direction:column;gap:12px}
+.sovrow .sh{display:flex;justify-content:space-between;font-size:.86rem;margin-bottom:5px}
+.sovrow .sn{font-weight:600;display:flex;align-items:center;gap:7px} .sovrow .sv{font-family:var(--mono);color:var(--muted)}
+.sovrow.you .sn{color:var(--indigo);font-weight:800}
+.sovrow .tr{height:10px;background:var(--raise);border-radius:999px;overflow:hidden}
+.sovrow .fl{height:100%;border-radius:999px;transition:width .8s var(--ease)}
+.rankdot{width:20px;height:20px;border-radius:6px;display:inline-grid;place-items:center;font-family:var(--mono);font-size:.66rem;font-weight:700;color:#fff;flex:0 0 auto}
+
+/* prompt matrix */
+.matrix{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.mtable{border-collapse:separate;border-spacing:0;width:100%;min-width:520px}
+.mtable th,.mtable td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--line)}
+.mtable th{font-size:.68rem;color:var(--faint);font-weight:700;text-transform:uppercase;letter-spacing:.03em;position:sticky;top:0}
+.mtable th.q,.mtable td.q{text-align:left;min-width:200px;font-weight:500;font-size:.86rem;color:var(--ink)}
+.mtable th.youcol{color:var(--indigo)}
+.mtable td .rankdot{margin:0 auto}
+.mtable .miss{color:var(--faint);font-family:var(--mono);font-size:.8rem}
+.qloc{font-size:.6rem;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:.04em;margin-left:6px}
+.answer{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:.85rem;color:var(--muted);margin-top:8px;line-height:1.55}
+.answer b{color:var(--ink)}
+details.pans{margin-top:2px}
+details.pans summary{cursor:pointer;font-size:.78rem;color:var(--indigo);font-weight:600;list-style:none;padding:4px 0}
+details.pans summary::-webkit-details-marker{display:none}
+
+/* competitors */
+.comp{display:flex;align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px;margin-bottom:9px}
+.comp .rk{font-family:var(--mono);font-weight:800;font-size:1rem;color:var(--faint);width:26px;flex:0 0 auto;text-align:center}
+.comp .cinfo{flex:1;min-width:0} .comp .cn{font-weight:700} .comp .cm{font-size:.78rem;color:var(--muted)}
+.comp .cbar{width:90px;flex:0 0 auto}
+.comp.you{border-color:rgba(91,91,245,.3);background:rgba(91,91,245,.05)}
+
+/* fan-out tree */
+.tree{overflow-x:auto}
+.fanwrap{display:flex;flex-direction:column;gap:9px}
+.fanleaf{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:11px;border:1px solid var(--line);background:var(--panel2)}
+.fanleaf .dotstat{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.fanleaf.win{border-left:3px solid var(--green)} .fanleaf.win .dotstat{background:var(--green)}
+.fanleaf.lose{border-left:3px solid var(--red)} .fanleaf.lose .dotstat{background:var(--red)}
+.fanleaf .fq{flex:1;font-size:.86rem;font-weight:500}
+.fanleaf .fr{font-size:.76rem;color:var(--muted);font-family:var(--mono)}
+
+/* action plan */
+.plan{display:flex;flex-direction:column;gap:12px}
+.planitem{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:15px}
+.planitem .pt{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.planitem .pn{width:26px;height:26px;border-radius:8px;background:var(--prism);color:#fff;font-family:var(--mono);font-weight:700;font-size:.8rem;display:grid;place-items:center;flex:0 0 auto}
+.planitem .ph{font-weight:700;font-size:.98rem}
+.planitem .pwhy{font-size:.85rem;color:var(--muted);margin-bottom:9px}
+.planitem .pact{font-size:.88rem;background:#fff;border:1px solid var(--line);border-left:3px solid var(--indigo);border-radius:8px;padding:9px 12px;outline:none}
+.planitem .pact:focus{border-color:var(--indigo)}
+
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:14px}
+.kpi .kl{font-size:.7rem;color:var(--faint);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.kpi .kv{font-family:var(--mono);font-weight:800;font-size:1.5rem;margin-top:5px;letter-spacing:-.02em}
+.kpi .ks{font-size:.74rem;color:var(--muted);margin-top:2px}
+.words{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.word{font-size:.84rem;font-weight:600;padding:5px 12px;border-radius:999px;background:var(--panel2);border:1px solid var(--line2)}
+
+.empty{text-align:center;color:var(--faint);padding:40px 18px}
+.disc{font-size:.74rem;color:var(--faint);text-align:center;margin-top:20px;line-height:1.5}
+footer{border-top:1px solid var(--line);padding:26px 0;text-align:center;color:var(--faint);font-size:.82rem}
+footer a{color:var(--muted);font-weight:600}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:999px;font-size:.85rem;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:120;box-shadow:0 14px 44px rgba(0,0,0,.25)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(min-width:680px){
+  .wrap{padding:0 24px}
+  .formgrid{grid-template-columns:1fr 1fr}
+  .formgrid .full{grid-column:1/-1}
+  .grid{grid-template-columns:1fr 1fr}
+  .grid .full{grid-column:1/-1}
+  .kpis{grid-template-columns:repeat(4,1fr)}
+}
+@media(min-width:1000px){
+  .grid{grid-template-columns:repeat(3,1fr)}
+  .grid .full{grid-column:1/-1}
+  .grid .w2{grid-column:span 2}
+}
+@media(max-width:679px){
+  nav{flex-wrap:wrap;height:auto;min-height:60px;padding:8px 0;gap:8px}
+  .hgroup{margin-left:0;width:100%;justify-content:flex-end;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap"><nav>
+    <a class="logo" href="#" id="homeLogo"><svg class="lm" viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="#0E1220"/><path d="M28 30h44M28 50h30M28 70h20" stroke="#5B5BF5" stroke-width="9" stroke-linecap="round"/><circle cx="74" cy="66" r="11" fill="none" stroke="#EC4899" stroke-width="7"/></svg>Cited</a>
+    <div class="hgroup">
+      <div class="pill detail hidden" id="detailPill" title="Detail level">
+        <button data-d="low">Low</button><button data-d="med" class="on">Med</button><button data-d="high">High</button>
+      </div>
+      <div class="aiT on" id="aiToggle"><div class="sw"></div><span>Live AI</span></div>
+      <button class="iconbtn hidden" id="rescanBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.5 9a9 9 0 0114.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0020.5 15"/></svg>New scan</button>
+    </div>
+  </nav></div>
+</header>
+
+<!-- SETUP -->
+<div id="setupScreen">
+  <div class="wrap hero">
+    <div class="kick"><span>◆</span> AI answer-engine visibility</div>
+    <h1>Do you show up when<br>the world asks <span class="grad">AI?</span></h1>
+    <p>People don't scroll ten blue links anymore, they ask ChatGPT, Gemini and Perplexity and act on the answer. Cited asks those models your customers' buying questions, then shows exactly where you land, who gets named instead, and how to get cited.</p>
+  </div>
+  <div class="wrap"><div class="setup">
+    <div class="card">
+      <div class="ctitle" style="font-family:var(--display);font-size:1.02rem;color:var(--ink);text-transform:none;letter-spacing:-.01em">Set up your scan</div>
+      <div class="csub">Tell Cited who you are and what buyers ask. Defaults are filled in so you can just hit scan.</div>
+      <div class="formgrid">
+        <div class="fg"><label>Your brand or business</label><input class="fin" id="s_brand" value="Notion"></div>
+        <div class="fg"><label>Category <span class="hint">what you offer</span></label><input class="fin" id="s_cat" value="project management and notes app"></div>
+        <div class="fg full"><label>Competitors <span class="hint">comma separated, optional</span></label><input class="fin" id="s_comp" value="Asana, Trello, ClickUp, Monday.com, Obsidian"></div>
+      </div>
+      <div class="checkrow" style="margin-top:14px">
+        <input type="checkbox" id="s_local"><label for="s_local">Also check local visibility ("best ... near me")</label>
+      </div>
+      <div class="fg full hidden" id="locWrap" style="margin-top:12px"><label>Location <span class="hint">city or area</span></label><input class="fin" id="s_loc" placeholder="e.g. Austin, TX"></div>
+
+      <div style="margin-top:20px">
+        <div class="ctitle">Buyer questions to test <span class="help" id="promptCount"></span></div>
+        <div class="promptlist" id="promptList"></div>
+        <button class="addbtn" id="addPrompt" style="margin-top:10px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Add question</button>
+      </div>
+
+      <div class="keyrow" id="keyrow">
+        <input id="ai_key" type="password" placeholder="Paste a free Google Gemini key for real scans on your deployed site">
+        <div class="small">Stored only in this browser, sent only to Google. Free key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>. Inside Claude, real scans work with no key.</div>
+      </div>
+
+      <div class="btnrow" style="margin-top:20px">
+        <button class="btn primary block" id="runScan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>Run visibility scan</button>
+      </div>
+    </div>
+    <div class="disc">Cited measures what AI models actually recommend for your buyer questions. It is a marketing insight tool, not affiliated with any AI provider. Your inputs stay in your browser.</div>
+  </div></div>
+</div>
+
+<!-- SCANNING -->
+<div class="wrap hidden" id="scanScreen">
+  <div class="scanning">
+    <div class="scanorb"></div>
+    <h3>Asking the models what they recommend...</h3>
+    <div class="cur" id="scanCur"></div>
+    <div class="progress"><div class="fl" id="scanFl" style="width:0%"></div></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="wrap ws hidden" id="results">
+  <div class="resulthead" id="resultHead"></div>
+  <div class="subnav" id="subnav"></div>
+  <div id="tabs"></div>
+</div>
+
+<footer><div class="wrap">Cited · built by <a href="https://debashishkumarbora.github.io" target="_blank" rel="noopener">Debashish Kumar Bora</a> · measures your brand inside AI answers · runs in your browser, your data never leaves it</div></footer>
+<div class="toast" id="toast"></div>
+<script>
+(function(){
+"use strict";
+var $=function(s,c){return (c||document).querySelector(s);};
+var $$=function(s,c){return Array.prototype.slice.call((c||document).querySelectorAll(s));};
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+var toastT;function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("show");},2400);}
+
+/* ===== state ===== */
+var state={brand:"Notion",cat:"project management and notes app",comps:["Asana","Trello","ClickUp","Monday.com","Obsidian"],
+  local:false,loc:"",prompts:[],detail:"med",aiOn:true,gkey:"",results:null,activeTab:"overview"};
+
+/* ===== prompt generation ===== */
+function genPrompts(){
+  var c=state.cat||"tool";
+  var web=[
+    "best "+c+" in 2026",
+    "top "+c+" for small businesses",
+    "most reliable "+c+" people recommend",
+    "affordable "+c+" that's actually good",
+    "best "+c+" for beginners",
+    "what "+c+" do professionals use"
+  ];
+  var loc=[];
+  if(state.local&&state.loc){var L=state.loc;loc=["best "+c+" near "+L,"top rated "+c+" in "+L,c+" recommendations "+L];}
+  var arr=web.map(function(t){return {text:t,local:false};}).concat(loc.map(function(t){return {text:t,local:true};}));
+  return arr.slice(0,9);
+}
+
+/* ===== deterministic simulation (sample mode) ===== */
+function hashStr(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function simRanking(promptText){
+  var rng=mulberry32(hashStr(promptText+"|"+state.brand+"|"+state.comps.join(","))) ;
+  var pool=[state.brand].concat(state.comps);
+  var generic=["Popular Choice","Market Leader Co","Budget Pick","The Newcomer","Legacy Tool","Rival Labs"];
+  var gi=0;while(pool.length<6&&gi<generic.length){if(pool.indexOf(generic[gi])<0)pool.push(generic[gi]);gi++;}
+  // shuffle deterministically
+  var arr=pool.slice();for(var i=arr.length-1;i>0;i--){var j=Math.floor(rng()*(i+1));var t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  var n=5+Math.floor(rng()*3); arr=arr.slice(0,n);
+  // brand inclusion ~62%
+  var includeBrand=rng()<0.62;
+  var without=arr.filter(function(x){return !brandMatch(x,state.brand);});
+  if(includeBrand){var rank=Math.floor(rng()*Math.min(4,without.length+1));without.splice(rank,0,state.brand);return without.slice(0,n);}
+  return without.slice(0,n);
+}
+
+/* ===== brand matching + scoring ===== */
+function norm(s){return String(s).toLowerCase().replace(/[^a-z0-9]/g,"");}
+function brandMatch(name,target){var a=norm(name),b=norm(target);if(!a||!b)return false;if(a===b)return true;if(b.length>=4&&a.indexOf(b)>=0)return true;if(a.length>=4&&b.indexOf(a)>=0)return true;return false;}
+function rankOf(brands,target){for(var i=0;i<brands.length;i++){if(brandMatch(brands[i],target))return i+1;}return 0;}
+function scoreFromResults(per){
+  var pts=0,appear=0,ranks=[];
+  per.forEach(function(p){var r=rankOf(p.brands,state.brand);if(r>0){appear++;ranks.push(r);pts+=Math.max(0.25,1-(r-1)*0.13);}});
+  var visibility=Math.round(pts/per.length*100);
+  var avgRank=ranks.length?ranks.reduce(function(a,b){return a+b;},0)/ranks.length:null;
+  // share of voice
+  var tally={};per.forEach(function(p){p.brands.forEach(function(b){var key=canonical(b);tally[key]=(tally[key]||0)+1;});});
+  var total=Object.keys(tally).reduce(function(a,k){return a+tally[k];},0)||1;
+  var sov=Object.keys(tally).map(function(k){return {name:k,count:tally[k],share:tally[k]/total,you:brandMatch(k,state.brand)};}).sort(function(a,b){return b.count-a.count;});
+  return {visibility:visibility,appear:appear,total:per.length,appearRate:appear/per.length,avgRank:avgRank,mentions:appear,sov:sov};
+}
+var canonMap={};
+function canonical(name){var k=norm(name);if(canonMap[k])return canonMap[k];
+  if(brandMatch(name,state.brand)){canonMap[k]=state.brand;return state.brand;}
+  for(var i=0;i<state.comps.length;i++){if(brandMatch(name,state.comps[i])){canonMap[k]=state.comps[i];return state.comps[i];}}
+  canonMap[k]=name;return name;}
+
+/* ===== colors / charts ===== */
+function scoreColor(s){return s>=60?"#12B886":s>=35?"#F59E0B":"#F03E5E";}
+function rankColor(r){return r===1?"#12B886":r<=3?"#5B5BF5":r<=5?"#F59E0B":"#F03E5E";}
+function svgGauge(score){
+  var R=52,C=2*Math.PI*R,frac=Math.max(0,Math.min(1,score/100)),col=scoreColor(score);
+  return '<svg viewBox="0 0 120 120" style="width:120px;height:120px;transform:rotate(-90deg)">'+
+    '<circle cx="60" cy="60" r="'+R+'" fill="none" stroke="#EEF0F6" stroke-width="12"/>'+
+    '<circle cx="60" cy="60" r="'+R+'" fill="none" stroke="'+col+'" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+(frac*C)+' '+C+'"/></svg>';
+}
+function sovBar(row,max){var col=row.you?"#5B5BF5":"#B9BFD0";var w=Math.round(row.share*100);
+  return '<div class="sovrow'+(row.you?" you":"")+'"><div class="sh"><span class="sn">'+esc(row.name)+(row.you?' <span style="font-size:.66rem;background:rgba(91,91,245,.12);padding:1px 6px;border-radius:5px">YOU</span>':'')+'</span><span class="sv">'+w+'% · '+row.count+'\u00D7</span></div><div class="tr"><div class="fl" style="width:'+Math.round(row.share/max*100)+'%;background:'+col+'"></div></div></div>';}
+
+/* ===== AI layer ===== */
+var GEMINI_MODEL="gemini-2.0-flash";
+function llmAnthropic(sys,u){return fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:900,system:sys,messages:[{role:"user",content:u}]})}).then(function(r){if(!r.ok)throw new Error("a"+r.status);return r.json();}).then(function(d){return (d.content||[]).filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join("\n").trim();});}
+function llmGemini(sys,u){if(!state.gkey)return Promise.reject(new Error("nokey"));return fetch("https://generativelanguage.googleapis.com/v1beta/models/"+GEMINI_MODEL+":generateContent?key="+encodeURIComponent(state.gkey),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:[{role:"user",parts:[{text:u}]}],generationConfig:{maxOutputTokens:900,temperature:0.6}})}).then(function(r){if(!r.ok)throw new Error("g"+r.status);return r.json();}).then(function(d){var c=d.candidates&&d.candidates[0];return ((c&&c.content&&c.content.parts)||[]).map(function(p){return p.text||"";}).join("").trim();});}
+function llm(sys,u){if(state.gkey)return llmGemini(sys,u);return llmAnthropic(sys,u);}
+function parseJSON(t){var s=String(t).replace(/```json|```/g,"").trim();var a=s.indexOf("{"),b=s.lastIndexOf("}");if(a>=0&&b>a)s=s.slice(a,b+1);return JSON.parse(s);}
+
+/* ===== scan orchestration ===== */
+function getRankingReal(p){
+  var sys="You are an AI answer engine like ChatGPT or Perplexity that recommends real, specific brands and products. Answer as you genuinely would, naming what is actually good and widely recommended.";
+  var u='A user asks: "'+p.text+'"\nName the specific real brands or products you would recommend, strongest first. Return ONLY JSON: {"brands":["Name","Name",...]} with 5 to 8 real names. No commentary, no explanation.';
+  return llm(sys,u).then(function(t){var j=parseJSON(t);var arr=(j.brands||[]).filter(function(x){return typeof x==="string"&&x.trim();}).map(function(x){return x.trim();});if(!arr.length)throw new Error("empty");return arr.slice(0,8);});
+}
+function runScanFlow(){
+  var per=state.prompts.map(function(p){return {text:p.text,local:p.local,brands:null};});
+  var done=0,success=0,total=per.length||1;
+  function bump(txt){done++;var el=$("#scanFl");if(el)el.style.width=Math.round(done/total*100)+"%";var c=$("#scanCur");if(c&&txt)c.textContent=txt;}
+  var chain;
+  if(state.aiOn){
+    var idx=0;
+    function worker(){
+      if(idx>=per.length)return Promise.resolve();
+      var p=per[idx++];var c=$("#scanCur");if(c)c.textContent='"'+p.text+'"';
+      return getRankingReal(p).then(function(arr){p.brands=arr;success++;}).catch(function(){p.brands=simRanking(p.text);}).then(function(){bump('"'+p.text+'"');return worker();});
+    }
+    chain=Promise.all([worker(),worker(),worker()]);
+  } else {
+    per.forEach(function(p){p.brands=simRanking(p.text);});
+    chain=new Promise(function(res){var i=0;var iv=setInterval(function(){bump(per[i]?'"'+per[i].text+'"':"");i++;if(i>=total){clearInterval(iv);res();}},130);});
+  }
+  return chain.then(function(){
+    var mode=(state.aiOn&&success>0)?"real":"sample";
+    per.forEach(function(p){if(!p.brands)p.brands=simRanking(p.text);});
+    canonMap={};
+    return {per:per,mode:mode,stats:scoreFromResults(per)};
+  });
+}
+function engineSentiment(stats){
+  var s=stats.visibility;
+  var words=s>=60?["established","widely-recommended","trusted","versatile"]:s>=35?["known","niche","situational","promising"]:["under-the-radar","overlooked","emerging","rarely-named"];
+  var desc=s>=60?state.brand+" is treated as a go-to name in "+state.cat+", surfacing in most answers.":s>=35?state.brand+" shows up sometimes in "+state.cat+", but not as a default recommendation.":state.brand+" is largely absent when AI recommends "+state.cat+".";
+  return {desc:desc,words:words};
+}
+function enginePlan(stats,per){
+  var absent=per.filter(function(p){return rankOf(p.brands,state.brand)===0;}).map(function(p){return p.text;});
+  var top=stats.sov.filter(function(s){return !s.you;})[0];
+  var plan=[];
+  if(absent.length)plan.push({title:"Win the questions you're missing",why:"You don't appear for "+absent.length+" of "+stats.total+" buyer questions, that's where demand is walking to competitors.",action:'Publish a clear, answer-first page targeting: "'+absent[0]+'".'});
+  plan.push({title:"Get named on third-party lists",why:"AI answers lean heavily on earned media, roundups, and reviews, not your own site.",action:"Get "+state.brand+" added to 3 reputable \u201Cbest "+state.cat+"\u201D roundups or comparison articles this quarter."});
+  if(top)plan.push({title:"Close the gap with "+top.name,why:top.name+" is named most often in your space, models have learned to trust it as a default.",action:"Create a direct \u201C"+state.brand+" vs "+top.name+"\u201D comparison page with clear, factual differentiators."});
+  plan.push({title:"Make your facts machine-readable",why:"Models cite sources they can parse and trust, short, structured, factual.",action:"Add concise FAQ + structured data (JSON-LD) covering pricing, use-cases and category on your key pages."});
+  return plan.slice(0,4);
+}
+function enrich(base){
+  var stats=base.stats,per=base.per,mode=base.mode;
+  var fanout=per.map(function(p){var r=rankOf(p.brands,state.brand);return {q:p.text,local:p.local,win:r>0,rank:r,winner:p.brands[0]||"\u2013"};});
+  var res={per:per,mode:mode,stats:stats,fanout:fanout,sentiment:null,plan:null};
+  var jobs=[];
+  if(mode==="real"&&stats.appear>0){
+    jobs.push(llm("You are a concise brand analyst.",'In the context of '+state.cat+', how would AI answer engines briefly describe the brand "'+state.brand+'"? Return ONLY JSON: {"desc":"one sentence","words":["adjective","adjective","adjective","adjective"]}').then(function(t){var j=parseJSON(t);if(!j.words)throw 0;res.sentiment=j;}).catch(function(){res.sentiment=engineSentiment(stats);}));
+  } else res.sentiment=engineSentiment(stats);
+  if(mode==="real"){
+    var absent=per.filter(function(p){return rankOf(p.brands,state.brand)===0;}).map(function(p){return p.text;});
+    var top=stats.sov.filter(function(s){return !s.you;}).slice(0,3).map(function(s){return s.name;});
+    jobs.push(llm("You are a GEO (generative engine optimization) strategist. Practical and specific, no fluff.",'Brand: "'+state.brand+'" in category: '+state.cat+'. It appears in '+stats.appear+' of '+stats.total+' AI answers, average rank '+(stats.avgRank?stats.avgRank.toFixed(1):"n/a")+'. Competitors named most: '+(top.join(", ")||"n/a")+'. Questions where it is ABSENT: '+(absent.join(" | ")||"none")+'. Give a prioritized plan to get cited more often in AI answers. Return ONLY JSON: {"plan":[{"title":"short","why":"why it matters","action":"one concrete step"}]} with 3 to 4 items.').then(function(t){var j=parseJSON(t);res.plan=(j.plan&&j.plan.length)?j.plan:enginePlan(stats,per);}).catch(function(){res.plan=enginePlan(stats,per);}));
+  } else res.plan=enginePlan(stats,per);
+  return Promise.all(jobs).then(function(){return res;});
+}
+
+/* ===== render: head ===== */
+function renderHead(){
+  var r=state.results,s=r.stats;
+  var youSov=s.sov.filter(function(x){return x.you;})[0];
+  var verdict=s.visibility>=60?"Strong presence. You're one of the names AI reaches for.":s.visibility>=35?"Patchy. You show up, but you're not the default answer.":"Nearly invisible when AI recommends "+state.cat+".";
+  var badge=r.mode==="real"?'<span class="statusbadge live"><span class="d"></span>Live AI · real model answers</span>':'<span class="statusbadge sample"><span class="d"></span>Sample data · add a key or open in Claude</span>';
+  $("#resultHead").innerHTML=
+    '<div class="gauge">'+svgGauge(s.visibility)+'<div class="gv"><div class="n" style="color:'+scoreColor(s.visibility)+'">'+s.visibility+'</div><div class="l">visibility</div></div></div>'+
+    '<div class="rhmeta"><h2>'+esc(state.brand)+' in AI answers '+badge+'</h2><div class="verdict">'+verdict+'</div>'+
+    '<div class="rhstats" style="margin-top:12px">'+
+      '<div class="rhstat"><div class="v">'+s.appear+'/'+s.total+'</div><div class="l">answers you appear in</div></div>'+
+      '<div class="rhstat"><div class="v">'+(s.avgRank?"#"+s.avgRank.toFixed(1):"\u2013")+'</div><div class="l">average rank</div></div>'+
+      '<div class="rhstat"><div class="v">'+(youSov?Math.round(youSov.share*100):0)+'%</div><div class="l">share of voice</div></div>'+
+    '</div></div>';
+}
+
+/* ===== subnav + dispatch ===== */
+var TABS=[["overview","Overview"],["prompts","Prompt matrix"],["competitors","Competitors"],["fanout","Query fan-out"],["plan","Action plan"]];
+function buildSubnav(){$("#subnav").innerHTML=TABS.map(function(t){return '<button data-t="'+t[0]+'">'+t[1]+'</button>';}).join("");
+  $$("#subnav button").forEach(function(b){b.addEventListener("click",function(){go(b.dataset.t);});});}
+function go(tab){state.activeTab=tab;$$("#subnav button").forEach(function(b){b.classList.toggle("on",b.dataset.t===tab);});renderTab();window.scrollTo({top:0,behavior:"smooth"});}
+function applyDetail(){var root=$("#tabs");if(!root)return;$$(".d-med",root).forEach(function(e){e.classList.toggle("hidden",state.detail==="low");});$$(".d-high",root).forEach(function(e){e.classList.toggle("hidden",state.detail!=="high");});}
+function renderTab(){
+  var t=state.activeTab,html="";
+  if(t==="overview")html=renderOverview();
+  else if(t==="prompts")html=renderPrompts();
+  else if(t==="competitors")html=renderCompetitors();
+  else if(t==="fanout")html=renderFanout();
+  else if(t==="plan")html=renderPlan();
+  $("#tabs").innerHTML=html;
+  if(t==="plan")wirePlan();
+  applyDetail();
+}
+
+/* ===== tabs ===== */
+function renderOverview(){
+  var r=state.results,s=r.stats,se=r.sentiment;
+  var maxShare=s.sov[0]?s.sov[0].share:1;
+  var sov='<div class="card full"><div class="ctitle">Share of voice <span class="help">how often each brand is named across your '+s.total+' questions</span></div><div class="sov">'+s.sov.slice(0,7).map(function(row){return sovBar(row,maxShare);}).join("")+'</div></div>';
+  var rivals=s.sov.filter(function(x){return !x.you;}).length;
+  var kpis='<div class="card full"><div class="kpis">'+
+    '<div class="kpi"><div class="kl">Appearances</div><div class="kv">'+s.appear+'/'+s.total+'</div><div class="ks">'+Math.round(s.appearRate*100)+'% of questions</div></div>'+
+    '<div class="kpi"><div class="kl">Average rank</div><div class="kv">'+(s.avgRank?"#"+s.avgRank.toFixed(1):"\u2013")+'</div><div class="ks">when you appear</div></div>'+
+    '<div class="kpi"><div class="kl">Visibility score</div><div class="kv" style="color:'+scoreColor(s.visibility)+'">'+s.visibility+'</div><div class="ks">rank-weighted</div></div>'+
+    '<div class="kpi"><div class="kl">Rivals named</div><div class="kv">'+rivals+'</div><div class="ks">distinct competitors</div></div>'+
+  '</div></div>';
+  var desc='<div class="card w2 d-med"><div class="ctitle">How AI describes you</div><div style="font-size:.98rem;margin-bottom:12px">'+esc(se.desc)+'</div><div class="words">'+(se.words||[]).map(function(w){return '<span class="word">'+esc(w)+'</span>';}).join("")+'</div></div>';
+  var absent=r.per.filter(function(p){return rankOf(p.brands,state.brand)===0;});
+  var gap='<div class="card d-med"><div class="ctitle">Biggest gap</div>'+(absent.length?'<div style="font-size:1.6rem;font-family:var(--mono);font-weight:800;color:var(--red)">'+absent.length+'</div><div class="ks" style="color:var(--muted);font-size:.85rem;margin-top:2px">questions where you\'re missing. Starting point: <b style="color:var(--ink)">"'+esc(absent[0].text)+'"</b></div>':'<div style="font-size:1.6rem;font-family:var(--mono);font-weight:800;color:var(--green)">0</div><div class="ks" style="font-size:.85rem;margin-top:2px">You appear in every question tested. Now push for rank #1.</div>')+'</div>';
+  return '<div class="grid">'+sov+kpis+desc+gap+'</div>';
+}
+function renderPrompts(){
+  var r=state.results,s=r.stats;
+  var rivals=s.sov.filter(function(x){return !x.you;}).slice(0,4).map(function(x){return x.name;});
+  var cols=[state.brand].concat(rivals);
+  var head='<tr><th class="q">Buyer question</th>'+cols.map(function(c,i){return '<th'+(i===0?' class="youcol"':'')+'>'+esc(c.length>14?c.slice(0,13)+"\u2026":c)+'</th>';}).join("")+'</tr>';
+  var rows=r.per.map(function(p){
+    var cells=cols.map(function(c){var rk=rankOf(p.brands,c);return '<td>'+(rk>0?'<span class="rankdot" style="background:'+rankColor(rk)+'">'+rk+'</span>':'<span class="miss">\u2013</span>')+'</td>';}).join("");
+    return '<tr><td class="q">'+esc(p.text)+(p.local?'<span class="qloc">local</span>':'')+'</td>'+cells+'</tr>';
+  }).join("");
+  var table='<div class="card full"><div class="ctitle">Prompt matrix <span class="help">who each model names, and at what rank</span></div><div class="matrix"><table class="mtable">'+head+rows+'</table></div><div class="legend"><div class="lg"><span class="rankdot" style="background:#12B886">1</span>rank 1</div><div class="lg"><span class="rankdot" style="background:#5B5BF5">2</span>top 3</div><div class="lg"><span class="rankdot" style="background:#F59E0B">4</span>4-5</div><div class="lg"><span class="miss">\u2013</span> not named</div></div></div>';
+  var detail='<div class="card full d-high"><div class="ctitle">What AI actually named, per question</div>'+r.per.map(function(p){return '<div style="padding:10px 0;border-bottom:1px solid var(--line)"><div style="font-weight:600;font-size:.88rem;margin-bottom:7px">'+esc(p.text)+(p.local?'<span class="qloc">local</span>':'')+'</div><div class="chips">'+p.brands.map(function(b,i){var you=brandMatch(b,state.brand);return '<span class="chip'+(you?" you":"")+'"><span class="mono" style="font-size:.72rem;color:var(--faint)">'+(i+1)+'</span> '+esc(b)+'</span>';}).join("")+'</div></div>';}).join("")+'</div>';
+  return '<div class="grid">'+table+detail+'</div>';
+}
+function renderCompetitors(){
+  var r=state.results,s=r.stats,max=s.sov[0]?s.sov[0].share:1;
+  var youAppear={};r.per.forEach(function(p){p.brands.forEach(function(b){var k=canonical(b);});});
+  var rows=s.sov.map(function(row,i){
+    var beats=0;r.per.forEach(function(p){var rr=rankOf(p.brands,row.name),yr=rankOf(p.brands,state.brand);if(rr>0&&(yr===0||rr<yr)&&!row.you)beats++;});
+    return '<div class="comp'+(row.you?" you":"")+'"><div class="rk">'+(i+1)+'</div><div class="cinfo"><div class="cn">'+esc(row.name)+(row.you?' <span style="font-size:.66rem;color:var(--indigo)">(you)</span>':'')+'</div><div class="cm">named in '+row.count+' of '+s.total+' answers'+(row.you?"":" · ahead of you in "+beats)+'</div></div><div class="cbar"><div class="tr" style="height:9px;background:var(--raise);border-radius:999px;overflow:hidden"><div style="height:100%;width:'+Math.round(row.share/max*100)+'%;background:'+(row.you?"#5B5BF5":"#B9BFD0")+';border-radius:999px"></div></div></div></div>';
+  }).join("");
+  return '<div class="card full"><div class="ctitle">Who AI recommends in '+esc(state.cat)+' <span class="help">ranked by share of voice</span></div>'+rows+'</div>';
+}
+function renderFanout(){
+  var r=state.results;
+  var wins=r.fanout.filter(function(f){return f.win;}).length;
+  var intro='<div class="card full"><div class="ctitle">Query fan-out <span class="help">the buyer questions feeding AI answers in your space</span></div><div style="font-size:.92rem;color:var(--muted);margin-bottom:14px">When someone researches <b style="color:var(--ink)">'+esc(state.cat)+'</b>, AI fans out across these questions. You win <b style="color:var(--green)">'+wins+'</b> and lose <b style="color:var(--red)">'+(r.fanout.length-wins)+'</b>.</div><div class="fanwrap">'+
+    r.fanout.map(function(f){return '<div class="fanleaf '+(f.win?"win":"lose")+'"><span class="dotstat"></span><span class="fq">'+esc(f.q)+(f.local?'<span class="qloc">local</span>':'')+'</span><span class="fr">'+(f.win?"you're #"+f.rank:"won by "+esc(f.winner))+'</span></div>';}).join("")+
+    '</div></div>';
+  return '<div class="grid">'+intro+'</div>';
+}
+function renderPlan(){
+  var r=state.results;
+  var note=r.mode==="real"?"Generated from your live scan.":"Generated by the engine from your sample scan.";
+  return '<div class="grid"><div class="card full"><div class="ctitle">Action plan <span class="help">'+note+' · edit any step</span></div><div class="plan">'+
+    r.plan.map(function(p,i){return '<div class="planitem"><div class="pt"><div class="pn">'+(i+1)+'</div><div><div class="ph">'+esc(p.title)+'</div></div></div><div class="pwhy">'+esc(p.why)+'</div><div class="pact" contenteditable="true" data-pi="'+i+'">'+esc(p.action)+'</div></div>';}).join("")+
+    '</div></div></div>';
+}
+function wirePlan(){$$("#tabs .pact").forEach(function(el){el.addEventListener("blur",function(){state.results.plan[+el.dataset.pi].action=el.textContent;});});}
+
+/* ===== setup UI ===== */
+function renderPromptEditor(){
+  $("#promptList").innerHTML=state.prompts.map(function(p,i){
+    return '<div class="prow"><span class="pi">'+(i+1)+'</span>'+(p.local?'<span class="loc">local</span>':'')+'<input class="fin" data-pi="'+i+'" value="'+esc(p.text)+'"><button class="del" data-del="'+i+'" aria-label="remove"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
+  }).join("");
+  $("#promptCount").textContent=state.prompts.length+" questions";
+  $$("#promptList input[data-pi]").forEach(function(inp){inp.addEventListener("input",function(){state.prompts[+inp.dataset.pi].text=inp.value;});});
+  $$("#promptList [data-del]").forEach(function(b){b.addEventListener("click",function(){state.prompts.splice(+b.dataset.del,1);renderPromptEditor();});});
+}
+function parseComps(){state.comps=$("#s_comp").value.split(",").map(function(x){return x.trim();}).filter(Boolean);}
+function regenPrompts(){state.cat=$("#s_cat").value.trim()||"tool";state.local=$("#s_local").checked;state.loc=$("#s_loc").value.trim();state.prompts=genPrompts();renderPromptEditor();}
+function readSetup(){state.brand=$("#s_brand").value.trim();state.cat=$("#s_cat").value.trim();parseComps();state.local=$("#s_local").checked;state.loc=$("#s_loc").value.trim();state.gkey=$("#ai_key").value.trim();}
+function showScreen(n){$("#setupScreen").classList.toggle("hidden",n!=="setup");$("#scanScreen").classList.toggle("hidden",n!=="scan");$("#results").classList.toggle("hidden",n!=="results");
+  if(n!=="results"){$("#detailPill").classList.add("hidden");$("#rescanBtn").classList.add("hidden");}}
+
+/* ===== run ===== */
+function runScan(){
+  readSetup();
+  if(!state.brand){toast("Enter your brand first");return;}
+  if(!state.prompts.length){state.prompts=genPrompts();}
+  showScreen("scan");$("#scanFl").style.width="0%";$("#scanCur").textContent="";
+  runScanFlow().then(enrich).then(function(res){
+    state.results=res;state.activeTab="overview";
+    buildSubnav();showScreen("results");
+    $("#detailPill").classList.remove("hidden");$("#rescanBtn").classList.remove("hidden");
+    renderHead();renderTab();
+    if(res.mode==="sample"){toast("Sample data, add a free key for real scans");$("#keyrow").classList.add("show");}
+    else toast("Scan complete \u2713");
+  }).catch(function(e){toast("Scan hit a snag, try again");showScreen("setup");});
+}
+
+/* ===== init ===== */
+state.prompts=genPrompts();renderPromptEditor();
+$("#s_local").addEventListener("change",function(){$("#locWrap").classList.toggle("hidden",!this.checked);regenPrompts();});
+$("#s_loc").addEventListener("change",regenPrompts);
+$("#s_cat").addEventListener("change",regenPrompts);
+$("#s_comp").addEventListener("change",parseComps);
+$("#addPrompt").addEventListener("click",function(){state.prompts.push({text:"best "+(state.cat||"tool")+" for ...",local:false});renderPromptEditor();});
+$("#runScan").addEventListener("click",runScan);
+$("#rescanBtn").addEventListener("click",function(){showScreen("setup");window.scrollTo({top:0});});
+$("#homeLogo").addEventListener("click",function(e){e.preventDefault();showScreen("setup");window.scrollTo({top:0});});
+$("#aiToggle").addEventListener("click",function(){state.aiOn=!state.aiOn;this.classList.toggle("on",state.aiOn);this.querySelector("span").textContent=state.aiOn?"Live AI":"Sample";if(state.aiOn&&!$("#ai_key").value.trim())$("#keyrow").classList.add("show");if(!state.aiOn)$("#keyrow").classList.remove("show");});
+$$("#detailPill button").forEach(function(b){b.addEventListener("click",function(){state.detail=b.dataset.d;$$("#detailPill button").forEach(function(x){x.classList.toggle("on",x===b);});applyDetail();});});
+$("#ai_key").addEventListener("change",function(){state.gkey=this.value.trim();if(state.gkey){toast("Live AI key saved \u2713");$("#keyrow").classList.remove("show");}});
+
+})();
+</script>
+</body>
+</html>
