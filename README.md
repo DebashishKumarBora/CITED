@@ -36,15 +36,6 @@ That is the whole philosophy: the demo is real and useful with zero setup, and t
 - **Local mode** , flip it on to test "best ... near me" style questions for a location, tagged separately.
 - **Low / Medium / High detail** , dial how much depth you want, everywhere.
 
-## Run it
-
-One file. Open `index.html`, or host free on GitHub Pages:
-
-1. Create a public repo named `cited`.
-2. Upload `index.html` (plus this `README.md` and the `screenshots/` folder).
-3. Settings > Pages > Source: `main` branch, `/root`.
-4. Open the URL in an Incognito window (GitHub Pages caches hard).
-
 For real scans on your deployed site, open Cited, turn on Live AI, and paste a free Gemini key from aistudio.google.com/apikey. Without a key the deployed site shows a clearly-labelled sample scan.
 
 ## A note on measurement
